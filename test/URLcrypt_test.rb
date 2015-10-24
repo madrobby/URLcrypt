@@ -32,6 +32,34 @@ class TestURLcrypt < Test::Unit::TestCase
     assert_decoding(encoded, plain)
   end
 
+  def test_encoding_engine
+    assert_equal(URLcrypt.encoding_engine, URLcrypt::Base32Encoder)
+  end
+
+  def test_base64_encoder
+    str = "some random string 1445696691.5789719"
+    encoded = URLcrypt::Base64Encoder.new(str).encode
+    assert_equal(encoded, "c29tZSByYW5kb20gc3RyaW5nIDE0NDU2OTY2OTEuNTc4OTcxOQ==")
+  end
+
+  def test_base64_decoder
+    str = "c29tZSByYW5kb20gc3RyaW5nIDE0NDU2OTY2OTEuNTc4OTcxOQ=="
+    encoded = URLcrypt::Base64Encoder.new(str).decode
+    assert_equal(encoded, "some random string 1445696691.5789719")
+  end
+
+  def test_base64_escaped_encoder
+    str = "some random string 1445696691.5789719"
+    encoded = URLcrypt::Base64EscapedEncoder.new(str).encode
+    assert_equal(encoded, "c29tZSByYW5kb20gc3RyaW5nIDE0NDU2OTY2OTEuNTc4OTcxOQ%3D%3D")
+  end
+
+  def test_base64_esacped_decoder
+    str = "c29tZSByYW5kb20gc3RyaW5nIDE0NDU2OTY2OTEuNTc4OTcxOQ%3D%3D"
+    encoded = URLcrypt::Base64EscapedEncoder.new(str).decode
+    assert_equal(encoded, "some random string 1445696691.5789719")
+  end
+
   def test_empty_string
     assert_encode_and_decode('', '')
   end
