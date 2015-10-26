@@ -8,5 +8,5 @@ Gem::Specification.new do |s|
   s.require_paths << 'lib'
   s.requirements << 'none'
   s.summary = "Securely encode and decode short pieces of arbitrary binary data in URLs."
-  s.version = "0.1.1"
+  s.version = "0.2.1"
 end
