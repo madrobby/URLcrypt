@@ -1,4 +1,6 @@
 require 'openssl'
+require 'base64'
+require 'cgi'
 
 module URLcrypt
   # avoid vowels to not generate four-letter words, etc.
@@ -35,10 +37,9 @@ module URLcrypt
       [(0..n-1).to_a.reverse.collect {|i| TABLE[(c >> i * 5) & 0x1f].chr},
         ("=" * (8-n))] # TODO: remove '=' padding generation
     end
-
   end
 
-  class Coder
+  class BaseCoder
     def initialize(options = {})
       @key = options[:key] || URLcrypt.key
       @data = options[:data]
@@ -59,12 +60,20 @@ module URLcrypt
       d ||= @data
       crypter = cipher(:encrypt)
       crypter.iv = iv = crypter.random_iv
-      "#{encode(iv)}Z#{encode(crypter.update(d) + crypter.final)}"
+      join_parts encode(iv), encode(crypter.update(d) + crypter.final)
+    end
+
+    def split_parts str
+      str.split('Z')
+    end
+
+    def join_parts *args
+      args.join("Z")
     end
 
     def decrypt(d = nil)
       d ||= @data
-      iv, encrypted = d.split('Z').map{|part| decode(part)}
+      iv, encrypted = split_parts(d).map{|part| decode(part)}
       fail DecryptError, "not a valid string to decrypt" unless iv && encrypted
       decrypter = cipher(:decrypt)
       decrypter.iv = iv
@@ -89,20 +98,60 @@ module URLcrypt
     end
   end
 
+  class Base64Coder < BaseCoder
+    def encode(d = nil)
+      d ||= @data
+      Base64.urlsafe_encode64(d)
+    end
+
+    def decode(d = nil)
+      d ||= @data
+      Base64.urlsafe_decode64(d)
+    end
+
+    def split_parts str
+      str.split(':')
+    end
+
+    def join_parts *args
+      args.join(":")
+    end
+  end
+
+  class CGIBase64Coder < BaseCoder
+    def encode(d = nil)
+      d ||= @data
+      CGI.escape super(d)
+    end
+
+    def decode(d = nil)
+      d ||= @data
+      super CGI.unescape(d)
+    end
+  end
+
+  def self.default_coder
+    @default_coder || BaseCoder
+  end
+
+  def self.default_coder= val
+    @default_coder = val
+  end
+
   def self.encode(data)
-    Coder.new(data: data).encode
+    default_coder.new(data: data).encode
   end
 
   def self.decode(data)
-    Coder.new(data: data).decode
+    default_coder.new(data: data).decode
   end
 
   def self.decrypt(data)
-    Coder.new(data: data).decrypt
+    default_coder.new(data: data).decrypt
   end
 
   def self.encrypt(data)
-    Coder.new(data: data).encrypt
+    default_coder.new(data: data).encrypt
   end
   
   class DecryptError < ::ArgumentError; end
