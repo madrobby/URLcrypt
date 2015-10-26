@@ -70,4 +70,17 @@ class TestURLcrypt < Test::Unit::TestCase
     end
     assert_equal error.message, "not a valid string to decrypt"
   end
+
+  def test_multiple_coders
+    coder1 = URLcrypt::Coder.new(key: [SecureRandom.hex(64)].pack("H*"))
+    coder2 = URLcrypt::Coder.new(key: [SecureRandom.hex(64)].pack("H*"))
+  
+    str = "hello there friends."
+    coder1_encrypted = coder1.encrypt(str)
+    coder2_encrypted = coder2.encrypt(str)
+
+    assert_not_equal(coder1_encrypted, coder2_encrypted)
+    assert_equal(coder1.decrypt(coder1_encrypted), coder2.decrypt(coder2_encrypted))
+  end
+
 end
