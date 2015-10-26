@@ -64,10 +64,53 @@ class TestURLcrypt < Test::Unit::TestCase
     assert_equal(URLcrypt::decrypt(encrypted), original)
   end
 
+  def test_base64_encryption
+    # this key was generated via rake secret in a rails app, the pack() converts it into a byte array
+    URLcrypt::key =
+['d25883a27b9a639da85ea7e159b661218799c9efa63069fac13a6778c954fb6d721968887a19bdb01af8f59eb5a90d256bd9903355c20b0b4b39bf4048b9b17b'].pack('H*')
+    
+    original  = "hello world!"
+    
+    URLcrypt.default_coder = URLcrypt::Base64Coder
+
+    encrypted = URLcrypt::encrypt(original)
+    assert_equal(URLcrypt::decrypt(encrypted), original)
+
+    URLcrypt.default_coder = nil
+  end
+
+  def test_cgi_base64_encryption
+    # this key was generated via rake secret in a rails app, the pack() converts it into a byte array
+    URLcrypt::key =
+['d25883a27b9a639da85ea7e159b661218799c9efa63069fac13a6778c954fb6d721968887a19bdb01af8f59eb5a90d256bd9903355c20b0b4b39bf4048b9b17b'].pack('H*')
+    
+    original  = "hello world!"
+    
+    URLcrypt.default_coder = URLcrypt::CGIBase64Coder
+
+    encrypted = URLcrypt::encrypt(original)
+    assert_equal(URLcrypt::decrypt(encrypted), original)
+
+    URLcrypt.default_coder = nil
+  end
+
   def test_decrypt_error
     error = assert_raises(URLcrypt::DecryptError) do
       ::URLcrypt::decrypt("just some plaintext")
     end
     assert_equal error.message, "not a valid string to decrypt"
   end
+
+  def test_multiple_coders
+    coder1 = URLcrypt::BaseCoder.new(key: [SecureRandom.hex(64)].pack("H*"))
+    coder2 = URLcrypt::BaseCoder.new(key: [SecureRandom.hex(64)].pack("H*"))
+  
+    str = "hello there friends."
+    coder1_encrypted = coder1.encrypt(str)
+    coder2_encrypted = coder2.encrypt(str)
+
+    assert_not_equal(coder1_encrypted, coder2_encrypted)
+    assert_equal(coder1.decrypt(coder1_encrypted), coder2.decrypt(coder2_encrypted))
+  end
+
 end
