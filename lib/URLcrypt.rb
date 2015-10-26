@@ -1,5 +1,4 @@
 require 'openssl'
-require 'base64'
 
 module URLcrypt
   # avoid vowels to not generate four-letter words, etc.
@@ -7,63 +6,11 @@ module URLcrypt
   # filters when URLs are used in emails
   TABLE = "1bcd2fgh3jklmn4pqrstAvwxyz567890".freeze
 
-  def self.encoding_engine=(val)
-    @encoding_engine = val
-  end
-
-  def self.encoding_engine
-    @encoding_engine || Base32Encoder
-  end
-
   def self.key=(key)
     @key = key
   end
 
   class Chunk
-    def initialize(bytes)
-      @bytes = bytes
-      @encoder = URLcrypt.encoding_engine
-    end
-
-    def decode
-      @encoder.new(@bytes).decode
-    end
-    
-    def encode
-      @encoder.new(@bytes).encode
-    end
-  end
-
-  class Base64Encoder
-    def initialize(bytes)
-      @bytes = bytes
-    end
-
-    def encode
-      Base64.encode64(@bytes).gsub("\n", "")
-    end
-
-    def decode
-      Base64.decode64(@bytes)
-    end
-  end
-
-  class Base64EscapedEncoder
-    def initialize(bytes)
-      @bytes = bytes
-    end
-
-    def encode
-      CGI.escape Base64Encoder.new(@bytes).encode
-    end
-
-    def decode
-      Base64Encoder.new(CGI.unescape(@bytes)).decode
-    end
-  end
-
-  class Base32Encoder
-
     def initialize(bytes)
       @bytes = bytes
     end
