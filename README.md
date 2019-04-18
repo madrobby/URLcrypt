@@ -20,7 +20,7 @@ that doesn't have other authentication or persistence mechanisms (like cookies):
   * Links that come with an expiration date (à la S3)
   * Mini-apps that don't persist data on the server
 
-Works with Ruby 1.8, 1.9 and 2.0.
+Works with Ruby 2.1+
 
 **Important**: As a general guideline, URL lengths shouldn't exceed about 2000
 characters in length, as URLs longer than that will not work in some browsers
