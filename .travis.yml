@@ -11,6 +11,9 @@ rvm:
   - 2.2.0
   - 2.2.1
   - 2.2.1-clang
+  - 2.4.3
+  - 2.5.5
+  - 2.6.2
   - ruby-head
   - ruby-head-clang
   - jruby-19mode
