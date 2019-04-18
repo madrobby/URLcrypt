@@ -1,3 +1,4 @@
+# encoding: utf-8
 class URLcryptRegressionTest < TestClass
   def test_encryption_and_decryption
     original = '{"some":"json_data","token":"dfsfsdfsdf"}'
