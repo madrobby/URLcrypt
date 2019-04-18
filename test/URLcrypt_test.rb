@@ -1,37 +1,6 @@
-# encoding: utf-8
-require 'bundler'
-Bundler.require(:default, :test)
+require 'test_helper'
 
-require 'coveralls'
-Coveralls.wear!
-
-require 'test/unit'
-
-class TestURLcrypt < Test::Unit::TestCase
-  
-  require 'URLcrypt'
-  
-  def assert_bytes_equal(string1, string2)
-    bytes1 = string1.bytes.to_a.join(':')
-    bytes2 = string2.bytes.to_a.join(':')
-    assert_equal(bytes1, bytes2)
-  end
-  
-  def assert_decoding(encoded, plain)
-    decoded = URLcrypt.decode(encoded)
-    assert_bytes_equal(plain, decoded)
-  end
-
-  def assert_encoding(encoded, plain)
-    actual = URLcrypt.encode(plain)
-    assert_bytes_equal(encoded, actual)
-  end
-
-  def assert_encode_and_decode(encoded, plain)
-    assert_encoding(encoded, plain)
-    assert_decoding(encoded, plain)
-  end
-
+class TestURLcrypt < TestClass
   def test_empty_string
     assert_encode_and_decode('', '')
   end
@@ -41,11 +10,11 @@ class TestURLcrypt < Test::Unit::TestCase
       '111gc86f4nxw5zj1b3qmhpb14n5h25l4m7111',
       "\0\0awesome \n ü string\0\0")
   end
-  
+
   def test_invalid_encoding
     assert_decoding('ZZZZZ', '')
   end
-  
+
   def test_arbitrary_byte_strings
     0.step(1500,17) do |n|
       original = (0..n).map{rand(256).chr}.join
