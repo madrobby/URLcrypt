@@ -13,6 +13,7 @@ rvm:
   - ruby-head-clang
   - jruby-19mode
   - jruby-head
+bundler_args: --binstubs rake
 notifications:
   recipients:
     - thomas@slash7.com
